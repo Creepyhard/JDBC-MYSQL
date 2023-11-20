@@ -1,37 +1,34 @@
 package br.com.jdbcmysql;
 
 import br.com.jdbcmysql.DAO.ConnectionFactory;
+import br.com.jdbcmysql.DAO.PersonDAO;
 import br.com.jdbcmysql.DAO.UserDAO;
+import br.com.jdbcmysql.model.Person;
 import br.com.jdbcmysql.model.User;
-
-import java.sql.Connection;
-import java.sql.Timestamp;
 
 public class Main {
     public static void main(String[] args) {
 
-       UserDAO dao = new UserDAO();
+        PersonDAO personDao = new PersonDAO();
+        UserDAO userDao = new UserDAO();
 
-        for(User users : dao.listUsers()) {
-            System.out.println(users.toString());
+        personDao.createTblperson();
+        userDao.createTbluser();
+
+        Person p = new Person();
+
+        p.setFullName("Diego Rodrigues");
+        p.setEmail("diegor@gmail.com");
+        p.setTelephone("1199999999");
+        personDao.registerPerson(p,"123");
+
+        for(Person person : PersonDAO.listPerson()) {
+            System.out.println(person.toString());
         }
 
-       /* Long datetime = System.currentTimeMillis();
-        Timestamp timestamp = new Timestamp(datetime);
+        for(User user : userDao.listUsers()) {
+            System.out.println(user.toString());
+        }
 
-        User u = new User();
-        u.setInclusion(timestamp);
-        u.setName("Sofia Rosa");
-        u.setPassword("321");
-        u.setUserActive(1);
-
-        new UserDAO().registerUser(u);
-
-        UserDAO dao2 = new UserDAO();
-
-        for(User users : dao2.listUsers()) {
-            System.out.println(users.toString());
-            System.out.println(users + "sem");
-        }*/
     }
 }

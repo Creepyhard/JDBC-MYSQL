@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.Random;
 
 @Data
 @Entity
@@ -30,9 +31,12 @@ public class User {
 
     private String password;
 
+    private int levelAcess;
+
+    @Column(name = "idPerson")
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "tblpersonal", referencedColumnName = "id")
-    private Personal personal;
+    @JoinColumn(name = "tblperson", referencedColumnName = "id")
+    private Person person;
 
     public long getId() {
         return id;
@@ -50,6 +54,16 @@ public class User {
         this.name = name;
     }
 
+    public String getNameUser(String fullName) {
+        String nameUser = "";
+        nameUser = fullName.substring(0,fullName.indexOf(" ")) + String.valueOf(Math.abs(new Random().nextInt()));
+        if(nameUser.length() > 20) {
+            return nameUser.substring(0,20);
+        } else {
+        return nameUser;
+        }
+    }
+
     public String getPassword() {
         return password;
     }
@@ -59,7 +73,8 @@ public class User {
     }
 
     public Timestamp getInclusion() {
-        return inclusion;
+        Long datetime = System.currentTimeMillis();
+        return new Timestamp(datetime);
     }
 
     public void setInclusion(Timestamp inclusion) {
@@ -82,12 +97,12 @@ public class User {
         this.userActive = userActive;
     }
 
-    public Personal getPersonal() {
-        return personal;
+    public Person getPerson() {
+        return person;
     }
 
-    public void setPersonal(Personal personal) {
-        this.personal = personal;
+    public void setPersonal(Person person) {
+        this.person = person;
     }
 
     public User(long id, Timestamp inclusion, Timestamp alteration, String name,
@@ -113,7 +128,7 @@ public class User {
                 ", name='" + name + '\'' +
                 ", userActive=" + userActive +
                 ", password='" + password + '\'' +
-                ", idPersonal=" + personal +
+                ", idPersonal=" + person +
                 '}';
     }
 }
