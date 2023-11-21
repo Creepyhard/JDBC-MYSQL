@@ -1,5 +1,6 @@
 package br.com.jdbcmysql.model;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -72,6 +73,10 @@ public class User {
         this.password = password;
     }
 
+    public String getPasswordEncrypt(String password) {
+        return BCrypt.withDefaults().hashToString(12, password.toCharArray());
+    }
+
     public Timestamp getInclusion() {
         Long datetime = System.currentTimeMillis();
         return new Timestamp(datetime);
@@ -112,6 +117,11 @@ public class User {
         this.alteration = alteration;
         this.name = name;
         this.userActive = userActive;
+        this.password = password;
+    }
+
+    public User(String name, String password){
+        this.name = name;
         this.password = password;
     }
 

@@ -14,16 +14,15 @@ public class PersonDAO {
 
     public void createTblperson() {
         try {
-            String sql = //"DROP TABLE IF EXISTS tblperson" +
-                         "CREATE TABLE tblperson ("          +
-                         "id INT AUTO_INCREMENT NOT NULL,"   +
-                         "inclusion TIMESTAMP NOT NULL,"     +
-                         "alteration TIMESTAMP,"             +
-                         "fullName VARCHAR(100) NOT NULL,"   +
-                         "email VARCHAR(100) NOT NULLUNIQUE,"+
-                         "telephone VARCHAR(20) NOT NULL,"   +
-                         "position INT null,"                +
-                         "PRIMARY KEY (id))";
+            String sql = "CREATE TABLE tblperson ("              +
+                         "id INT AUTO_INCREMENT NOT NULL UNIQUE,"+
+                         "inclusion TIMESTAMP NOT NULL,"         +
+                         "alteration TIMESTAMP,"                 +
+                         "fullName VARCHAR(100) NOT NULL,"       +
+                         "email VARCHAR(100) NOT NULL UNIQUE,"   +
+                         "telephone VARCHAR(20) NOT NULL,"       +
+                         "position INT null,"                    +
+                         "PRIMARY KEY (id));";
 
             String sql2 = "SELECT 1 FROM tblperson limit 1";
 
@@ -33,7 +32,6 @@ public class PersonDAO {
 
             try {
                 ps2.executeQuery();
-                System.out.println("aqui");
             } catch (Exception ex) {
                 ps.execute();
             }
@@ -92,16 +90,33 @@ public class PersonDAO {
             psPerson.setString(3, p.getEmail());
             psPerson.setString(4, p.getTelephone());
 
-            String as2 = p.getFullName();
-            System.out.println(as2);
             psPerson.execute();
             psPerson.close();
 
+            //we send the password because  on the registration screen the user enters their personal data and password together.
             UserDAO userDao = new UserDAO();
             userDao.registerUserWithPerson(password);
 
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void dropAllTables() {
+        String sql = "DROP TABLE IF EXISTS tbluser;";
+        String sql2 = "DROP TABLE IF EXISTS tblperson;";
+
+        try {
+            Connection con = new ConnectionFactory().getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+            PreparedStatement ps2 = con.prepareStatement(sql2);
+
+            ps.execute();
+            ps2.execute();
+            ps.close();
+            System.out.println("deleted all tables");
+        } catch (Exception e) {
+            System.out.println("Error delete tables");
         }
     }
 }
