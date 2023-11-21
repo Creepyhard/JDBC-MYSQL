@@ -1,5 +1,6 @@
 package br.com.jdbcmysql.DAO;
 
+import at.favre.lib.crypto.bcrypt.BCrypt;
 import br.com.jdbcmysql.model.Person;
 import br.com.jdbcmysql.model.User;
 
@@ -11,14 +12,14 @@ public class UserDAO {
 
     public void createTbluser() {
         try {
-            String sql = //"DROP TABLE IF EXISTS tbluser" +
+            String sql = //"DROP TABLE IF EXISTS tbluser;" +
                          "CREATE TABLE jdbc_mysql.tbluser ("     +
                          "id INT NOT NULL AUTO_INCREMENT UNIQUE,"+
                          "inclusion TIMESTAMP NOT NULL,"         +
                          "alteration TIMESTAMP NULL,"            +
                          "name VARCHAR(20) NOT NULL UNIQUE,"     +
                          "userActive INT NOT NULL,"              +
-                         "password VARCHAR(50) NOT NULL,"        +
+                         "password VARCHAR(61) NOT NULL,"        +
                          "idLevelAcess INT NOT NULL,"            +
                          "idPerson VARCHAR(45) NOT NULL,"        +
                          "PRIMARY KEY (id),"                     +
@@ -26,7 +27,7 @@ public class UserDAO {
                          "FOREIGN KEY (id)\n"                    +
                          "REFERENCES jdbc_mysql.tblperson(id)\n" +
                          "ON DELETE NO ACTION\n"                 +
-                         "ON UPDATE NO ACTION)";
+                         "ON UPDATE NO ACTION);";
 
             String sql2 = "SELECT 1 FROM tbluser limit 1";
 
@@ -101,8 +102,10 @@ public class UserDAO {
 
     public void registerUserWithPerson(String password) {
 
-        String sqlInsertUser = "INSERT INTO tbluser (INCLUSION, NAME, USERACTIVE, PASSWORD, IDPERSON, IDLEVELACESS)" +
+        String sqlInsertUser =  "INSERT INTO tbluser (INCLUSION, NAME, USERACTIVE, PASSWORD, IDPERSON, IDLEVELACESS)" +
                                 "VALUES (?,?,?,?,?,?)";
+
+        //we link the user to the person by differentiating where we store the data
         String sqlReturnPerson = "SELECT * FROM tblperson order by id desc limit 1";
 
         int pID = 0;
@@ -110,27 +113,24 @@ public class UserDAO {
         User u = new User();
 
         try {
-            Person p = new Person();
             Connection con = new ConnectionFactory().getConnection();
             PreparedStatement psUser = con.prepareStatement(sqlInsertUser);
-
             PreparedStatement psRetUser = con.prepareStatement(sqlReturnPerson);
             ResultSet rs = psRetUser.executeQuery();
 
+            //I don't know why the first select is null
             while(rs.next()) {
                 pID = rs.getInt("id");
                 pFullName = rs.getString("fullName");
             }
-            System.out.println(pID);
-            System.out.println(pFullName);
-            System.out.println(u.getNameUser(pFullName));
-
             psRetUser.close();
 
             psUser.setTimestamp(1, u.getInclusion());
+            //we create the first nickname with the user's real name + random numbers
             psUser.setString(2,u.getNameUser(pFullName));
             psUser.setInt(3, 1);
-            psUser.setString(4, password);
+            //bcrypt password encryption
+            psUser.setString(4, u.getPasswordEncrypt(password));
             psUser.setInt(5, pID);
             psUser.setInt(6, 1);
 
@@ -138,6 +138,33 @@ public class UserDAO {
             psUser.close();
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    public String loginAcess(User user) {
+        String sql = "SELECT PASSWORD FROM TBLUSER WHERE NAME = ?";
+        String passwordDB = "";
+        BCrypt.Result result = null;
+        try {
+            Connection con = new ConnectionFactory().getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+
+            ps.setString(1, user.getName());
+
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                passwordDB = rs.getString("password");
+            }
+
+            result = BCrypt.verifyer().verify(user.getPassword().toCharArray(), passwordDB);
+        } catch (Exception e) {
+            return "error";
+        }
+        if (result.verified) {
+            return "Access released";
+        } else {
+            return "Acess denied";
         }
     }
 
