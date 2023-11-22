@@ -10,24 +10,29 @@ import java.sql.Timestamp;
 @Table(name = "tblperson")
 public class Person {
 
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private long id;
 
-    @Column(name = "idUser")
+/*    @Column(name = "idUser")
     @OneToOne
     @JoinColumn(name = "tbluser", referencedColumnName = "id")
-    private User user;
+    private User user;*/
 
+    @Column
     private Timestamp inclusion;
 
+    @Column
     private Timestamp alteration;
 
+    @Column(length = 100)
     private String fullName;
 
+    @Column(length = 100)
     private String email;
 
+    @Column(length = 20)
     private String telephone;
 
     @Column(name = "idCargo")
@@ -49,14 +54,6 @@ public class Person {
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Timestamp getInclusion() {
@@ -117,7 +114,7 @@ public class Person {
         return "Person{" +
                 "id=" + id +
                 ", fullName='" + fullName + '\'' +
-                ", user=" + user +
+                //", user=" + user +
                 ", inclusion=" + inclusion +
                 ", alteration=" + alteration +
                 ", email='" + email + '\'' +

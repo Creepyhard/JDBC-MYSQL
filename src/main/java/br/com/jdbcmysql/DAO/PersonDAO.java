@@ -3,10 +3,8 @@ package br.com.jdbcmysql.DAO;
 import br.com.jdbcmysql.model.Person;
 import br.com.jdbcmysql.model.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.xml.transform.Result;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,19 +81,27 @@ public class PersonDAO {
 
         try {
             Connection con = new ConnectionFactory().getConnection();
-            PreparedStatement psPerson = con.prepareStatement(sqlInsertPerson);
+            PreparedStatement psPerson = con.prepareStatement(sqlInsertPerson, Statement.RETURN_GENERATED_KEYS);
 
             psPerson.setTimestamp(1, p.getInclusion());
             psPerson.setString(2, p.getFullName());
             psPerson.setString(3, p.getEmail());
             psPerson.setString(4, p.getTelephone());
 
-            psPerson.execute();
-            psPerson.close();
+            psPerson.executeUpdate();
+            //psPerson.execute();
+
+            ResultSet rs = psPerson.getGeneratedKeys();
+
+            int idPerson = 0;
+            if (rs.next()) {
+                idPerson = rs.getInt(1);
+            }
 
             //we send the password because  on the registration screen the user enters their personal data and password together.
+            psPerson.close();
             UserDAO userDao = new UserDAO();
-            userDao.registerUserWithPerson(password);
+            userDao.registerUserWithPerson(idPerson, password);
 
         } catch (SQLException e) {
             e.printStackTrace();

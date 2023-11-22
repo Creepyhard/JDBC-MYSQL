@@ -22,10 +22,20 @@ public class Main {
         Person p = new Person();
         User u = new User();
 
-        /*p.setFullName("Diego Rodrigues");
+       /* p.setFullName("Diego Rodrigues");
         p.setEmail("diegor@gmail.com");
         p.setTelephone("1199999999");
         personDao.registerPerson(p,"123");*/
+
+        p.setFullName("Cm Yoshi");
+        p.setEmail("CmYoshi@gmail.com");
+        p.setTelephone("1155555555");
+        personDao.registerPerson(p,"cmyoshi");
+
+      /*  p.setFullName("Cne Claris");
+        p.setEmail("CneClaris@gmail.com");
+        p.setTelephone("1166666666");
+        personDao.registerPerson(p,"cneClaris");*/
 
         for(Person person : PersonDAO.listPerson()) {
             System.out.println(person.toString());
@@ -36,10 +46,10 @@ public class Main {
         }
 
         //test login acess
-        u.setName("Diego336566974");
-        u.setPassword("123");
+        /*u.setName("Diego336566974'--");
+        u.setPassword("123");*/
 
-        System.out.println(userDao.loginAcess(u));
+       // System.out.println(userDao.loginAcess(u));
 
     }
 }

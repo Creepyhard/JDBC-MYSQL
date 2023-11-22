@@ -17,7 +17,7 @@ public class UserDAO {
                          "id INT NOT NULL AUTO_INCREMENT UNIQUE,"+
                          "inclusion TIMESTAMP NOT NULL,"         +
                          "alteration TIMESTAMP NULL,"            +
-                         "name VARCHAR(20) NOT NULL UNIQUE,"     +
+                         "nickname VARCHAR(20) NOT NULL UNIQUE," +
                          "userActive INT NOT NULL,"              +
                          "password VARCHAR(61) NOT NULL,"        +
                          "idLevelAcess INT NOT NULL,"            +
@@ -63,7 +63,7 @@ public class UserDAO {
                 User u = new User();
                 u.setId(rs.getInt("id"));
                 u.setInclusion(rs.getTimestamp("inclusion"));
-                u.setName(rs.getString("name"));
+                u.setName(rs.getString("nickname"));
                 u.setPassword(rs.getString("password"));
                 u.setUserActive(rs.getInt("useractive"));
                 //u.setPersonal();
@@ -100,15 +100,17 @@ public class UserDAO {
         }
     }*/
 
-    public void registerUserWithPerson(String password) {
+    public void registerUserWithPerson(int idPerson, String password) {
 
-        String sqlInsertUser =  "INSERT INTO tbluser (INCLUSION, NAME, USERACTIVE, PASSWORD, IDPERSON, IDLEVELACESS)" +
+        String sqlInsertUser =  "INSERT INTO tbluser (INCLUSION, NICKNAME, USERACTIVE, PASSWORD, IDPERSON, IDLEVELACESS)" +
                                 "VALUES (?,?,?,?,?,?)";
 
+        //improved
         //we link the user to the person by differentiating where we store the data
-        String sqlReturnPerson = "SELECT * FROM tblperson order by id desc limit 1";
+        //String sqlReturnPerson = "SELECT * FROM tblperson order by id desc limit 1";
+        String sqlReturnPerson = "SELECT * FROM tblperson where id = " + Integer.toString(idPerson);
 
-        int pID = 0;
+        //int pID = 0;
         String pFullName = "";
         User u = new User();
 
@@ -120,7 +122,7 @@ public class UserDAO {
 
             //I don't know why the first select is null
             while(rs.next()) {
-                pID = rs.getInt("id");
+                //pID = rs.getInt("id");
                 pFullName = rs.getString("fullName");
             }
             psRetUser.close();
@@ -131,7 +133,7 @@ public class UserDAO {
             psUser.setInt(3, 1);
             //bcrypt password encryption
             psUser.setString(4, u.getPasswordEncrypt(password));
-            psUser.setInt(5, pID);
+            psUser.setInt(5, idPerson);
             psUser.setInt(6, 1);
 
             psUser.execute();
@@ -142,7 +144,7 @@ public class UserDAO {
     }
 
     public String loginAcess(User user) {
-        String sql = "SELECT PASSWORD FROM TBLUSER WHERE NAME = ?";
+        String sql = "SELECT PASSWORD FROM TBLUSER WHERE NICKNAME = ?";
         String passwordDB = "";
         BCrypt.Result result = null;
         try {

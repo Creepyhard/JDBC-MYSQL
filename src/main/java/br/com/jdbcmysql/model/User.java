@@ -14,25 +14,36 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column
     private long id;
 
+    @Column
     private Timestamp inclusion;
 
-    //private int userInclusion;
+    @Column
+    private int userInclusion;
 
-    private Timestamp alteration;
+    @Column
+    private Timestamp alteration; //Time of change
 
-    //private Timestamp userAlteration;
+    @Column
+    private Timestamp userAlteration;//ID User Log Acess
 
+    @Column(unique = true, name = "nickname", length = 20)
     private String name;
 
     //private String fullName;
 
+    @Column
     private int userActive;
 
+    @Column(length = 61)
     private String password;
 
-    private int levelAcess;
+    @Column(name = "idLevelAcess")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "tblLevelAcess", referencedColumnName = "id")
+    private LevelAccess levelAcess;
 
     @Column(name = "idPerson")
     @OneToOne(cascade = CascadeType.ALL)
@@ -55,6 +66,14 @@ public class User {
         this.name = name;
     }
 
+    public String getNameMaster() {
+        if (this.name.startsWith("$")) {
+            return this.name;
+        } else {
+            return null;
+        }
+    }
+
     public String getNameUser(String fullName) {
         String nameUser = "";
         nameUser = fullName.substring(0,fullName.indexOf(" ")) + String.valueOf(Math.abs(new Random().nextInt()));
@@ -63,6 +82,10 @@ public class User {
         } else {
         return nameUser;
         }
+    }
+
+    public String getIpAcess() {
+        return "192.1.1.15";
     }
 
     public String getPassword() {
@@ -87,7 +110,8 @@ public class User {
     }
 
     public Timestamp getAlteration() {
-        return alteration;
+        Long datetime = System.currentTimeMillis();
+        return new Timestamp(datetime);
     }
 
     public void setAlteration(Timestamp alteration) {
@@ -107,6 +131,26 @@ public class User {
     }
 
     public void setPersonal(Person person) {
+        this.person = person;
+    }
+
+    public int getUserInclusion() {
+        return userInclusion;
+    }
+
+    public void setUserInclusion(int userInclusion) {
+        this.userInclusion = userInclusion;
+    }
+
+    public Timestamp getUserAlteration() {
+        return userAlteration;
+    }
+
+    public void setUserAlteration(Timestamp userAlteration) {
+        this.userAlteration = userAlteration;
+    }
+
+    public void setPerson(Person person) {
         this.person = person;
     }
 
