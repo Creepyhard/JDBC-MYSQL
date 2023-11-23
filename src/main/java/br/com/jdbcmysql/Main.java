@@ -1,17 +1,15 @@
 package br.com.jdbcmysql;
 
-import at.favre.lib.crypto.bcrypt.BCrypt;
-import br.com.jdbcmysql.DAO.ConnectionFactory;
-import br.com.jdbcmysql.DAO.PersonDAO;
-import br.com.jdbcmysql.DAO.UserDAO;
+import br.com.jdbcmysql.daoimpl.PersonDAOImpl;
+import br.com.jdbcmysql.daoimpl.UserDAOImpl;
 import br.com.jdbcmysql.model.Person;
 import br.com.jdbcmysql.model.User;
 
 public class Main {
     public static void main(String[] args) {
 
-        PersonDAO personDao = new PersonDAO();
-        UserDAO userDao = new UserDAO();
+        PersonDAOImpl personDao = new PersonDAOImpl();
+        UserDAOImpl userDao = new UserDAOImpl();
 
         //many records
         //personDao.dropAllTables();
@@ -37,7 +35,11 @@ public class Main {
         p.setTelephone("1166666666");
         personDao.registerPerson(p,"cneClaris");*/
 
-        for(Person person : PersonDAO.listPerson()) {
+        /*  p.setFullName("Cny lyv");
+        p.setEmail("Cnylyv@gmail.com");
+        p.setTelephone("1166666666");
+        personDao.registerPerson(p,"Cny lyvd");*/
+        for(Person person : PersonDAOImpl.listPerson()) {
             System.out.println(person.toString());
         }
 
