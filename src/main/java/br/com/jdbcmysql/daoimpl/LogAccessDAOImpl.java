@@ -6,29 +6,38 @@ import br.com.jdbcmysql.model.User;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Statement;
 
 public class LogAccessDAOImpl implements LogAccessDAO {
 
-    public long thereWereChanges(User u) {
+    public int thereWereChanges(User u) {
         String sqlLoginTrue = "INSERT INTO TBLLOGACCESS (INCLUSION, USERALTERATION, IPACESS, USERMASTER)" +
                 "VALUES (?,?,?,?)";
+        int idInclusion = 0;
+        
         try {
             Connection con = new ConnectionFactory().getConnection();
-            PreparedStatement psLogAcess = con.prepareStatement(sqlLoginTrue, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement psLogAccess = con.prepareStatement(sqlLoginTrue, Statement.RETURN_GENERATED_KEYS);
 
-            psLogAcess.setTimestamp(1, u.getAlteration());
-            psLogAcess.setLong(2, u.getId());
-            psLogAcess.setString(3, u.getIpAcess());
-            psLogAcess.setString(4, u.getNameMaster());
+            psLogAccess.setTimestamp(1, u.getAlteration());
+            psLogAccess.setLong(2, u.getId());
+            psLogAccess.setString(3, u.getIpAcess());
+            psLogAccess.setString(4, u.getNameMaster());
 
-            psLogAcess.execute();
-            psLogAcess.close();
-
-            return 1;
+            psLogAccess.executeUpdate();
+            psLogAccess.close();
+            
+            ResultSet rs = psLogAccess.getGeneratedKeys();
+            
+            if (rs.next()) {
+                idInclusion = rs.getInt(1);
+            }
+            
         } catch (Exception e) {
-            return 2;
+            e.printStackTrace();
         }
+        return idInclusion;
     }
 }
 

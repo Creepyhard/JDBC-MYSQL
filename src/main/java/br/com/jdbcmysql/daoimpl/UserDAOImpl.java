@@ -4,6 +4,7 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import br.com.jdbcmysql.DAO.ConnectionFactory;
 import br.com.jdbcmysql.DAO.UserDAO;
 import br.com.jdbcmysql.model.User;
+import com.mysql.cj.protocol.Resultset;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -24,7 +25,7 @@ public class UserDAOImpl implements UserDAO {
                             "nickname VARCHAR(20) NOT NULL UNIQUE," +
                             "userActive INT NOT NULL,"              +
                             "password VARCHAR(61) NOT NULL,"        +
-                            "idLevelAcess INT NOT NULL,"            +
+                            "idLevelAccess INT NOT NULL,"           +
                             "idPerson VARCHAR(45) NOT NULL,"        +
                             "PRIMARY KEY (id),"                     +
                             "CONSTRAINT idPerson\n"                 +
@@ -106,7 +107,7 @@ public class UserDAOImpl implements UserDAO {
 
     public void registerUserWithPerson(int idPerson, String password) {
 
-        String sqlInsertUser =  "INSERT INTO tbluser (INCLUSION, NICKNAME, USERACTIVE, PASSWORD, IDPERSON, IDLEVELACESS)" +
+        String sqlInsertUser =  "INSERT INTO tbluser (INCLUSION, NICKNAME, USERACTIVE, PASSWORD, IDPERSON, IDLEVELACCESS)" +
                 "VALUES (?,?,?,?,?,?)";
 
         //improved
@@ -126,7 +127,6 @@ public class UserDAOImpl implements UserDAO {
 
             //I don't know why the first select is null
             while(rs.next()) {
-                //pID = rs.getInt("id");
                 pFullName = rs.getString("fullName");
             }
             psRetUser.close();
@@ -143,6 +143,29 @@ public class UserDAOImpl implements UserDAO {
             psUser.execute();
             psUser.close();
         } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateUser(User user) {
+        long x = (user.getId());
+        String sql = "UPDATE tbluser SET ALTERATION = ?, NICKNAME = ?, userActive = ?, password = ?, idLevelAccess = ? WHERE ID = " + x;
+
+        LogAccessDAOImpl logAccess = new LogAccessDAOImpl();
+        try {
+            Connection con = new ConnectionFactory().getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+
+            //ifNull returns the same information stored in the table
+            ps.setInt(1, logAccess.thereWereChanges(user));
+            ps.setString(2, user.ifNullString(user.getName(), "NICKNAME"));
+            ps.setInt(3, Integer.parseInt(user.ifNullInt(user.getUserActive(), "userActive")));
+            ps.setString(4, user.ifNullString(user.verifyPasswordUpdate(x, user.getPassword()), "password"));
+            ps.setInt(5, Integer.parseInt(user.ifNullInt(user.getUserActive(), "idLevelAccess")));
+
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException e){
             e.printStackTrace();
         }
     }

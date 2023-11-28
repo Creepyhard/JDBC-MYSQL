@@ -1,9 +1,13 @@
 package br.com.jdbcmysql.model;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import br.com.jdbcmysql.DAO.ConnectionFactory;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Random;
 
@@ -54,6 +58,22 @@ public class User {
         return id;
     }
 
+    public String ifNullString(String infoUpdate, String fieldUpdate){
+        if(infoUpdate != null) {
+            return infoUpdate;
+        } else {
+            return fieldUpdate;
+        }
+    }
+
+    public String ifNullInt(int infoUpdate, String fieldUpdate){
+        if(infoUpdate != 0) {
+            return String.valueOf(infoUpdate);
+        } else {
+            return fieldUpdate;
+        }
+    }
+
     public void setId(long id) {
         this.id = id;
     }
@@ -98,6 +118,29 @@ public class User {
 
     public String getPasswordEncrypt(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
+    }
+
+    public String verifyPasswordUpdate(long idUser, String password) {
+        BCrypt.Result result = null;
+        String sql = "SELECT PASSWORD FROM TBLUSER WHERE ID = " + idUser;
+        String passwordDB = "";
+        try {
+            Connection con = new ConnectionFactory().getConnection();
+            PreparedStatement ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()) {
+                passwordDB = rs.getString("password");
+            }
+            result = BCrypt.verifyer().verify(password.toCharArray(), passwordDB);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (result.verified) {
+            return getPasswordEncrypt(password);
+        } else {
+            //Return error
+            return null;
+        }
     }
 
     public Timestamp getInclusion() {

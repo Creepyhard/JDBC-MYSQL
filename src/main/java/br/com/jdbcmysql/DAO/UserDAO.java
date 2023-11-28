@@ -9,5 +9,6 @@ public interface UserDAO {
     void createTbluser();
     List<User> listUsers();
     void registerUserWithPerson(int idPerson, String password);
+    void updateUser(User user);
     String loginAcess(User user);
 }

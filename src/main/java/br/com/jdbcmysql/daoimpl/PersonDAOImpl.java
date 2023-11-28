@@ -88,7 +88,6 @@ public class PersonDAOImpl {
             psPerson.setString(4, p.getTelephone());
 
             psPerson.executeUpdate();
-            //psPerson.execute();
 
             ResultSet rs = psPerson.getGeneratedKeys();
 
