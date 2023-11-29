@@ -10,5 +10,5 @@ public interface UserDAO {
     List<User> listUsers();
     void registerUserWithPerson(int idPerson, String password);
     void updateUser(User user);
-    String loginAcess(User user);
+    String loginAccess(User user);
 }

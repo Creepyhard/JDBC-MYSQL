@@ -4,7 +4,6 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import br.com.jdbcmysql.DAO.ConnectionFactory;
 import br.com.jdbcmysql.DAO.UserDAO;
 import br.com.jdbcmysql.model.User;
-import com.mysql.cj.protocol.Resultset;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -21,7 +20,9 @@ public class UserDAOImpl implements UserDAO {
                             "CREATE TABLE jdbc_mysql.tbluser ("     +
                             "id INT NOT NULL AUTO_INCREMENT UNIQUE,"+
                             "inclusion TIMESTAMP NOT NULL,"         +
+                            "userInclusion INT  NULL,"              +
                             "alteration TIMESTAMP NULL,"            +
+                            "userAlteration INT  NULL,"             +
                             "nickname VARCHAR(20) NOT NULL UNIQUE," +
                             "userActive INT NOT NULL,"              +
                             "password VARCHAR(61) NOT NULL,"        +
@@ -86,7 +87,7 @@ public class UserDAOImpl implements UserDAO {
     }
 
     /*public void registerUserWithoutPerson(User u) {
-
+        //create master users
         String sql = "INSERT INTO tbluser (INCLUSION, NAME, USER_ACTIVE, PASSWORD) VALUES (?,?,?,?)";
 
         try {
@@ -113,7 +114,7 @@ public class UserDAOImpl implements UserDAO {
         //improved
         //we link the user to the person by differentiating where we store the data
         //String sqlReturnPerson = "SELECT * FROM tblperson order by id desc limit 1";
-        String sqlReturnPerson = "SELECT * FROM tblperson where id = " + Integer.toString(idPerson);
+        String sqlReturnPerson = "SELECT * FROM tblperson where id = " + idPerson;
 
         //int pID = 0;
         String pFullName = "";
@@ -149,19 +150,23 @@ public class UserDAOImpl implements UserDAO {
 
     public void updateUser(User user) {
         long x = (user.getId());
-        String sql = "UPDATE tbluser SET ALTERATION = ?, NICKNAME = ?, userActive = ?, password = ?, idLevelAccess = ? WHERE ID = " + x;
+        String sql = "UPDATE tbluser SET ALTERATION = ?, USERALTERATION = ?," +
+                     "NICKNAME = IFNULL(?, NICKNAME), userActive = IFNULL(?, userActive)," +
+                     "password = IFNULL(?, password), idLevelAccess = IFNULL(?, idLevelAccess) " +
+                     "WHERE ID = " + x;
 
         LogAccessDAOImpl logAccess = new LogAccessDAOImpl();
         try {
             Connection con = new ConnectionFactory().getConnection();
             PreparedStatement ps = con.prepareStatement(sql);
 
-            //ifNull returns the same information stored in the table
-            ps.setInt(1, logAccess.thereWereChanges(user));
-            ps.setString(2, user.ifNullString(user.getName(), "NICKNAME"));
-            ps.setInt(3, Integer.parseInt(user.ifNullInt(user.getUserActive(), "userActive")));
-            ps.setString(4, user.ifNullString(user.verifyPasswordUpdate(x, user.getPassword()), "password"));
-            ps.setInt(5, Integer.parseInt(user.ifNullInt(user.getUserActive(), "idLevelAccess")));
+            ps.setTimestamp(1, user.getAlteration());
+            ps.setInt(2, logAccess.thereWereChanges(user));
+            //ps.setString(3, user.ifNullString(user.getName(), "NICKNAME"));
+            ps.setString(3, user.getName());
+            ps.setInt(4, user.getUserActive());
+            ps.setString(5, user.verifyPasswordUpdate(x, user.getPassword(), user.getOldPassword()));
+            ps.setInt(6, user.getUserActive());
 
             ps.executeUpdate();
             ps.close();
@@ -170,7 +175,7 @@ public class UserDAOImpl implements UserDAO {
         }
     }
 
-    public String loginAcess(User user) {
+    public String loginAccess(User user) {
         String sql = "SELECT PASSWORD FROM TBLUSER WHERE NICKNAME = ?";
         String passwordDB = "";
         BCrypt.Result result;

@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.Random;
 
+@SuppressWarnings("ALL")
 @Data
 @Entity
 @Table(name="tbluser")
@@ -31,7 +32,7 @@ public class User {
     private Timestamp alteration; //Time of change
 
     @Column
-    private Timestamp userAlteration;//ID User Log Acess
+    private Timestamp userAlteration;//ID User Log Access
 
     @Column(unique = true, name = "nickname", length = 20)
     private String name;
@@ -44,10 +45,12 @@ public class User {
     @Column(length = 61)
     private String password;
 
-    @Column(name = "idLevelAcess")
+    private String oldPassword;
+
+    @Column(name = "idLevelAccess")
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "tblLevelAcess", referencedColumnName = "id")
-    private LevelAccess levelAcess;
+    @JoinColumn(name = "tblLevelAccess", referencedColumnName = "id")
+    private LevelAccess levelAccess;
 
     @Column(name = "idPerson")
     @OneToOne(cascade = CascadeType.ALL)
@@ -104,7 +107,7 @@ public class User {
         }
     }
 
-    public String getIpAcess() {
+    public String getIpAccess() {
         return "192.1.1.15";
     }
 
@@ -116,11 +119,19 @@ public class User {
         this.password = password;
     }
 
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
+    }
+
     public String getPasswordEncrypt(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }
 
-    public String verifyPasswordUpdate(long idUser, String password) {
+    public String verifyPasswordUpdate(long idUser, String password, String oldPassword) {
         BCrypt.Result result = null;
         String sql = "SELECT PASSWORD FROM TBLUSER WHERE ID = " + idUser;
         String passwordDB = "";
@@ -131,7 +142,7 @@ public class User {
             while(rs.next()) {
                 passwordDB = rs.getString("password");
             }
-            result = BCrypt.verifyer().verify(password.toCharArray(), passwordDB);
+            result = BCrypt.verifyer().verify(oldPassword.toCharArray(), passwordDB);
         } catch (Exception e) {
             e.printStackTrace();
         }

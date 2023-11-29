@@ -11,10 +11,12 @@ public class PersonDAOImpl {
 
     public void createTblperson() {
         try {
-            String sql = "CREATE TABLE tblperson ("              +
+            String sql = "CREATE TABLE tblperson ("         +
                     "id INT AUTO_INCREMENT NOT NULL UNIQUE,"+
                     "inclusion TIMESTAMP NOT NULL,"         +
+                    "userInclusion INT  NULL,"              +
                     "alteration TIMESTAMP,"                 +
+                    "userAlteration INT  NULL,"             +
                     "fullName VARCHAR(100) NOT NULL,"       +
                     "email VARCHAR(100) NOT NULL UNIQUE,"   +
                     "telephone VARCHAR(20) NOT NULL,"       +
@@ -109,15 +111,20 @@ public class PersonDAOImpl {
     public void dropAllTables() {
         String sql = "DROP TABLE IF EXISTS tbluser;";
         String sql2 = "DROP TABLE IF EXISTS tblperson;";
+        String sql3 = "DROP TABLE IF EXISTS tblLogAccess;";
 
         try {
             Connection con = new ConnectionFactory().getConnection();
             PreparedStatement ps = con.prepareStatement(sql);
             PreparedStatement ps2 = con.prepareStatement(sql2);
+            PreparedStatement ps3 = con.prepareStatement(sql3);
 
             ps.execute();
             ps2.execute();
+            ps3.execute();
             ps.close();
+            ps2.close();
+            ps3.close();
             System.out.println("deleted all tables");
         } catch (Exception e) {
             System.out.println("Error delete tables");
